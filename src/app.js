@@ -16,10 +16,10 @@ app.use(cors());
 app.options("*", cors());
 
 //Routers
-app.use(`${api}/categories`, require("./routers/category"));
-app.use(`${api}/orders`, require("./routers/order"));
-app.use(`${api}/products`, require("./routers/product"));
-app.use(`${api}/users`, require("./routers/user"));
+app.use(`${api}/categories`, require("./routers/categories"));
+app.use(`${api}/orders`, require("./routers/orders"));
+app.use(`${api}/products`, require("./routers/products"));
+app.use(`${api}/users`, require("./routers/users"));
 
 mongoose
   .connect(process.env.DB_URL, {
