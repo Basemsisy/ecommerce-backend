@@ -41,4 +41,18 @@ router.get("/:id", async (req, res) => {
     res.send(error);
   }
 });
+
+router.put("/:id", async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (product) {
+      res.send(product);
+    } else res.status(404).json({ message: "not found this product" });
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 module.exports = router;
