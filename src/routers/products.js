@@ -3,6 +3,15 @@ const router = require("express").Router();
 const { Product } = require("../models/product");
 const { Category } = require("../models/category");
 
+router.get("/", async (req, res) => {
+  try {
+    const productList = await Product.find();
+    res.send(productList);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 router.post(`/`, async (req, res) => {
   try {
     const cat = await Category.findById(req.body.category);
