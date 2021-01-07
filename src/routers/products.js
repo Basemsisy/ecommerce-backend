@@ -4,8 +4,13 @@ const { Product } = require("../models/product");
 const { Category } = require("../models/category");
 
 router.get("/", async (req, res) => {
+  let filter = {};
+  if (req.query.category) {
+    filter["category"] = req.query.category.split(",");
+  }
+
   try {
-    const productList = await Product.find().populate("category");
+    const productList = await Product.find(filter).populate("category");
     res.send(productList);
   } catch (error) {
     res.send(error);
