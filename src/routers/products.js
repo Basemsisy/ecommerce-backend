@@ -50,6 +50,8 @@ router.put("/:id", async (req, res) => {
         new: true,
       })
         .then((product) => {
+          if (!product)
+            return res.status(404).json({ message: "not found this product" });
           res.send(product);
         })
         .catch((err) => {
@@ -64,7 +66,6 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const product = await Product.findOneAndDelete(req.params.id);
-    console.log(product);
     if (!product) {
       res.status(404).json({ success: false, message: "product not found" });
     } else
