@@ -5,7 +5,7 @@ const { Category } = require("../models/category");
 
 router.get("/", async (req, res) => {
   try {
-    const productList = await Product.find();
+    const productList = await Product.find().populate("category");
     res.send(productList);
   } catch (error) {
     res.send(error);
@@ -33,7 +33,7 @@ router.post(`/`, async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate("category");
     if (product) {
       res.send(product);
     } else res.status(404).json({ message: "not found this product" });
@@ -44,12 +44,18 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (product) {
-      res.send(product);
-    } else res.status(404).json({ message: "not found this product" });
+    const cat = await Category.findById(req.body.category);
+    if (cat) {
+      Product.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+      })
+        .then((product) => {
+          res.send(product);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } else res.status(404).json({ message: "not found this category" });
   } catch (error) {
     res.send(error);
   }
