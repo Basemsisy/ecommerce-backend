@@ -83,4 +83,16 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.get("/get/featured/:count?", async (req, res) => {
+  try {
+    const count = req.params.count ? req.params.count : 0;
+    const featuredProducts = await Product.find({ isFeatured: true }).limit(
+      +count
+    );
+    res.send(featuredProducts);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 module.exports = router;
