@@ -1,63 +1,63 @@
 const router = require("express").Router();
 const { Category } = require("../models/category");
+const response = require("../helpers/response");
 
+// get all categories
 router.get("/", async (req, res) => {
   try {
     const categoriesList = await Category.find();
-    res.send(categoriesList);
+    response(res, categoriesList, "done get categories", true);
   } catch (err) {
     res.send(err);
   }
 });
 
+// add new category
 router.post("/", async (req, res) => {
   try {
     let category = new Category(req.body);
     category = await category.save();
-    res.send(category);
+    response(res, category, "done create new category", true);
   } catch (err) {
     res.send(err);
   }
 });
 
+// delete category
 router.delete("/:id", async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) {
-      res.status(404).json({ success: false, message: "category not found" });
+      return response(res, undefined, "not found category by given id", false);
     }
-    res.send({
-      success: true,
-      message: "category deleted successfully",
-    });
-  } catch (err) {
-    res.send({ success: false, error: err });
-  }
-});
-
-router.get("/:id", async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
-    if (!category) {
-      res.status(404).json({
-        success: false,
-        message: "not found category by given id",
-        category,
-      });
-    }
-    res.send({ success: true, category });
+    response(res, undefined, "category deleted successfully", true);
   } catch (err) {
     res.send(err);
   }
 });
 
+// get category by id
+router.get("/:id", async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return response(res, null, "not found category by given id", false);
+    }
+    response(res, category, "done get the category", true);
+  } catch (err) {
+    res.send(err);
+  }
+});
+
+// update category
 router.put("/:id", async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    if (!category) res.status(404).json({ message: "not found category" });
-    res.send(category);
+    if (!category)
+      response(res, undefined, "not found category by given id ", false);
+    response(res, category, "done update this category", true);
   } catch (err) {
     res.send(err);
   }
