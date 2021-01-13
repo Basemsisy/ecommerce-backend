@@ -1,95 +1,86 @@
 const router = require("express").Router();
-
 const { Product } = require("../models/product");
 const { Category } = require("../models/category");
+const response = require("../helpers/response");
 
+// get all products
 router.get("/", async (req, res) => {
   let filter = {};
   if (req.query.category) {
     filter["category"] = req.query.category.split(",");
   }
-
   try {
     const productList = await Product.find(filter).populate("category");
-    res.send(productList);
+    response(res, productList, "done get products", true);
   } catch (error) {
     res.send(error);
   }
 });
 
+// add new product
 router.post(`/`, async (req, res) => {
   try {
     const cat = await Category.findById(req.body.category);
     if (cat) {
-      const newProduct = new Product(req.body);
-      newProduct
-        .save()
-        .then((product) => {
-          res.send(product);
-        })
-        .catch((err) => {
-          res.send(err);
-        });
-    } else res.status(404).json({ message: "not found this category" });
+      let newProduct = new Product(req.body);
+      newProduct = await newProduct.save();
+      response(res, newProduct, "done create product", true);
+    } else response(res, undefined, "not found this category", false);
   } catch (error) {
     res.send(error);
   }
 });
 
+// get product by id
 router.get("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate("category");
     if (product) {
-      res.send(product);
-    } else res.status(404).json({ message: "not found this product" });
+      response(res, product, "done get product", true);
+    } else response(res, null, "not found this product", false);
   } catch (error) {
     res.send(error);
   }
 });
 
+// update product
 router.put("/:id", async (req, res) => {
   try {
     const cat = await Category.findById(req.body.category);
     if (cat) {
-      Product.findByIdAndUpdate(req.params.id, req.body, {
+      const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
-      })
-        .then((product) => {
-          if (!product)
-            return res.status(404).json({ message: "not found this product" });
-          res.send(product);
-        })
-        .catch((err) => {
-          res.send(err);
-        });
-    } else res.status(404).json({ message: "not found this category" });
+      });
+
+      if (!product) response(res, null, "not found this product", false);
+      response(res, product, "done update this product", true);
+    } else response(res, null, "not found this category", false);
   } catch (error) {
     res.send(error);
   }
 });
 
+// delete product
 router.delete("/:id", async (req, res) => {
   try {
     const product = await Product.findOneAndDelete(req.params.id);
     if (!product) {
-      res.status(404).json({ success: false, message: "product not found" });
-    } else
-      res.send({
-        success: true,
-        message: "product deleted successfully",
-      });
+      return response(res, null, "not found this product", false);
+    }
+    response(res, null, "product deleted successfully", true);
   } catch (error) {
     res.send(error);
   }
 });
 
+// get featured products
 router.get("/get/featured/:count?", async (req, res) => {
   try {
-    const count = req.params.count ? req.params.count : 0;
+    const count = req.params.count || 0;
     const featuredProducts = await Product.find({ isFeatured: true }).limit(
       +count
     );
-    res.send(featuredProducts);
+    response(res, featuredProducts, "done get featured products", true);
   } catch (error) {
     res.send(error);
   }
