@@ -1,19 +1,24 @@
+require("dotenv/config");
 const express = require("express");
-const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv/config");
+const authMiddleware = require("./helpers/middlewares");
+const errorHandler = require("./helpers/errorHandler");
 
+const app = express();
 const api = process.env.API_PREFIX;
+
+app.use(cors());
+app.options("*", cors());
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(morgan("tiny"));
-app.use(cors());
-app.options("*", cors());
+app.use(authMiddleware());
+app.use(errorHandler);
 
 //Routers
 app.use(`${api}/categories`, require("./routers/categories"));
