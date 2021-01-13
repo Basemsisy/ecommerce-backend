@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/register", (req, res) => {
   const user = new User(req.body);
   user.hashPassword = bcrypt.hashSync(req.body.password, 10);
   user
@@ -41,14 +41,15 @@ router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (user && bcrypt.compareSync(req.body.password, user.hashPassword)) {
-      const secret = process.env.SECRET;
       const token = jwt.sign(
         {
-          id: user.id,
+          userId: user.id,
+          isAdmin: user.isAdmin,
         },
-        secret,
+        process.env.SECRET,
         { expiresIn: "1d" }
       );
+      user.hashPassword = undefined;
       res.send({ ...user._doc, token });
     } else res.send("not found this user");
   } catch (error) {
